@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a2a3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StockGo">
+<title>StockGo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4efe8;--card:#fff;--tx:#0a2a3a;--mut:#6b7d87;--ac:#0a2a3a;--ac2:#0e5a6d;--gold:#b8956a;--low:#c0392b;--bd:#e6ddd1;--ok:#1f8a7b}
+@media(prefers-color-scheme:dark){:root{--bg:#071820;--card:#102a36;--tx:#e8eff2;--mut:#8aa0ab;--bd:#1e4052;--ac:#e7f4f8;--ac2:#8fd0e0}}
+@media(prefers-color-scheme:dark){.catcard{background:#1a2c24;border-color:#3d5a45}.itemcard{background:#12303a;border-color:#24566a}.btn.back{background:#1c3340;color:#e8eff2;border-color:#34586a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:500 15px/1.45 Inter,system-ui,sans-serif}
+#splash{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;background:#071820 center/cover no-repeat;transition:opacity .7s}
+#splash::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,24,32,.2),rgba(7,24,32,.92))}
+#splash .inner{position:relative;z-index:1;text-align:center;color:#fff;padding:28px 22px 48px;max-width:440px}
+.mark{width:72px;height:72px;margin:0 auto 14px;border-radius:20px;border:1px solid rgba(230,211,180,.5);display:grid;place-items:center}
+#splash h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:62px;margin:0;line-height:.85}
+#splash h1 span{color:#e6d3b4}
+.eyebrow{letter-spacing:.38em;font-size:10px;color:#e6d3b4;margin:0 0 8px}
+#splash .sub{letter-spacing:.14em;font-size:12px;text-transform:uppercase;opacity:.9;margin:14px 0 22px}
+.btn-enter{background:#fff;color:#0a2a3a;border:0;border-radius:999px;padding:14px 34px;font-weight:800;cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+main{padding:12px 12px 128px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin:10px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.n{font-size:24px;font-weight:800}.mut{color:var(--mut);font-size:13px}
+.btn{padding:11px 12px;border-radius:12px;border:1px solid var(--ac);font-weight:700;cursor:pointer;background:none;color:var(--ac);font:inherit}
+.btn.pri{background:#0e5a6d;color:#fff;border-color:#0e5a6d}
+.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+.btn.wa{background:#1fa855;color:#fff;border-color:#1fa855}
+.btn.pdf{background:#0a2a3a;color:#fff;border-color:#0a2a3a}
+.btn.xls{background:#1f7a4d;color:#fff;border-color:#1f7a4d}
+.btn.back{background:#efe6da;color:#0a2a3a;border-color:#d9cbb8}
+.btn.big{width:100%;padding:14px;border-radius:14px}.btn.small{padding:8px 10px;font-size:13px}
+.catcard{background:#f7f1e6;border:1px solid #e2d3bc;border-left:5px solid #b8956a}
+.itemcard{background:#fff;border:1px solid #d5e4ea;border-left:4px solid #0e5a6d;margin:8px 0 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;overflow:auto;background:var(--card);border-top:1px solid var(--bd);z-index:4;padding:6px 4px env(safe-area-inset-bottom)}
+.tb{flex:1;min-width:84px;padding:10px 4px 8px;border:0;background:none;color:var(--mut);font-weight:700;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.tb svg{width:26px;height:26px}
+.tb.on{color:var(--ac2)}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:20}#ov.on{display:flex}
+#sh{background:var(--bg);width:100%;max-width:720px;margin:0 auto;border-radius:20px 20px 0 0;padding:16px;max-height:92%;overflow:auto}
+label{display:block;font-size:12px;color:var(--mut);margin-top:10px;font-weight:600}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:30;display:none;max-width:90%}
+.thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;background:var(--bd)}
+.cat{cursor:pointer}
+.empty{text-align:center;padding:28px 12px;color:var(--mut)}
+.view{position:relative;border-radius:16px;overflow:hidden;background:#000}
+video{width:100%;max-height:42vh;object-fit:cover;background:#000}
+.frame{position:absolute;inset:18% 12%;border:2px solid #e6d3b4;border-radius:12px;pointer-events:none}
+.pill{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--bd)}
+.back{background:none;border:0;color:var(--ac2);font-weight:700;padding:0;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="splash" style="background-image:url('splash.jpg')">
+  <div class="inner">
+    <div class="mark"><svg width="42" height="28" viewBox="0 0 100 60" fill="#e6d3b4"><path d="M5 35 Q30 20 55 18 L95 5 Q70 22 55 28 L95 8 Q60 25 35 35 L5 38 Z"/></svg></div>
+    <p class="eyebrow">ALMACÉN · HOTEL</p>
+    <h1>Stock<span>Go</span></h1>
+    <p class="sub">Mi almacén, el restaurante<br>y lo que se mueve entre ambos</p>
+    <button class="btn-enter" onclick="enterApp()">Entrar</button>
+  </div>
+</div>
+<header><b>Stock<span style="color:#b8956a">Go</span></b><span class="mut" id="sub"></span></header>
+<main id="app"></main>
+<nav>
+<button class="tb on" data-t="alm" onclick="go('alm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>Almacén</button>
+<button class="tb" data-t="rest" onclick="go('rest')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3v8a4 4 0 0 0 4 4h0V3"/><path d="M8 21v-6"/><path d="M16 3v18"/><path d="M16 8h4a0 0 0 0 1 0 0v0a4 4 0 0 1-4 4"/></svg>Restaurante</button>
+<button class="tb" data-t="rot" onclick="go('rot')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l8 16"/><path d="M4 20h16"/><path d="M12 4v4"/></svg>Roturas</button>
+<button class="tb" data-t="tra" onclick="go('tra')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h13l-3-3"/><path d="M17 17H4l3 3"/><path d="M17 7l3 3-3 3"/><path d="M7 17l-3-3 3-3"/></svg>Traspasos</button>
+<button class="tb" data-t="ped" onclick="go('ped')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Pedido</button>
+<button class="tb" data-t="scan" onclick="go('scan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5h2M18 5h2v2M20 17v2h-2M6 19H4v-2"/><path d="M7 12h10"/></svg>Escanear</button>
+<button class="tb" data-t="help" onclick="go('help')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.7.3-1.2.9-1.2 1.6"/><path d="M12 17h.01"/></svg>Ayuda</button>
+</nav>
+<div id="ov"><div id="sh"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='stockgo-v5';
+let S={categories:[],items:[],roturas:[],traspasos:[],log:[]};
+let tab='alm', catOpen=null, stream=null, scanActive=false, reader=null, raf=0, pendingCode='', deferredPrompt=null;
+try{const d=JSON.parse(localStorage.getItem(KEY)||'null');
+ if(d&&Array.isArray(d.categories)){
+  S.categories=d.categories.filter(c=>c&&c.name);
+  S.items=(d.items||[]).filter(i=>i&&i.nombre);
+  S.roturas=d.roturas||[]; S.traspasos=d.traspasos||[]; S.log=d.log||[];
+ }
+}catch(e){}
+try{localStorage.removeItem('stockgo'); localStorage.removeItem('stockgo-v3');}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('No cabe en el móvil: quita alguna foto')}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const by=id=>S.items.find(i=>i.id===id);
+const catName=id=>{const c=S.categories.find(x=>x.id===id); return c?c.name:'Sin categoría'};
+function toast(t){const el=$('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2400);}
+function enterApp(){const s=$('splash'); if(!s) return; s.style.opacity='0'; s.style.pointerEvents='none'; setTimeout(()=>{s.style.display='none'; try{sessionStorage.setItem('sg_in','1')}catch(e){}},400);}
+document.querySelector('.btn-enter')?.addEventListener('click', enterApp);
+if(sessionStorage.getItem('sg_in')) $('splash').style.display='none';
+function go(t){tab=t; if(t!=='scan') stopScan(); if(t!=='alm') catOpen=null; render();}
+function shareBtns(kind){
+ return '<div class="g2"><button class="btn back" onclick="exportJson(\''+kind+'\')">Copia de seguridad</button><button class="btn wa" onclick="wa(\''+kind+'\')">WhatsApp</button></div>';
+}
+function render(){
+ document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+ const alm=S.items.reduce((a,i)=>a+(+i.almacen||0),0);
+ $('sub').textContent=S.categories.length+' categorías · '+alm+' uds almacén';
+ let h='';
+ if(tab==='alm') h=viewAlmacen();
+ else if(tab==='rest') h=viewRest();
+ else if(tab==='rot') h=viewRot();
+ else if(tab==='tra') h=viewTra();
+ else if(tab==='ped') h=viewPed();
+ else if(tab==='scan') h=viewScan();
+ else h=viewHelp();
+ $('app').innerHTML=h;
+ if(tab==='alm') bindAlmacen();
+ if(tab==='scan') bindScan();
+}
+let openCats={};
+function viewAlmacen(){
+ let h='';
+ h+='<div class="card"><b>Manifiesto del almacén</b><p class="mut">PDF para leer, Excel para trabajar, WhatsApp para mandarlo. La copia de seguridad es el archivo técnico.</p><div class="g2"><button type="button" class="btn pdf" id="btnManPdf">PDF</button><button type="button" class="btn xls" id="btnManXls">Excel</button></div><div class="g2"><button type="button" class="btn wa" id="btnManWa">WhatsApp</button><button type="button" class="btn back" id="btnManJson">Copia de seguridad</button></div></div>';
+ h+='<div class="card"><label>Nueva categoría</label><input id="cn" placeholder="Copas, Platos llanos, Tazas…"><button type="button" class="btn pri big" style="margin-top:10px" id="btnCat">Crear categoría</button></div>';
+ h+='<button type="button" class="btn big" id="btnNewItem">+ Añadir artículo</button>';
+ if(!S.categories.length && !S.items.length) h+='<div class="card empty">Todavía no hay categorías. Escribe el nombre y pulsa crear: aparecerá aquí, plegada, y dentro podrás añadir artículos.</div>';
+ h+=S.categories.map(c=>{
+  const its=S.items.filter(i=>i.categoriaId===c.id);
+  const q=its.reduce((a,i)=>a+(+i.almacen||0),0);
+  const open=!!openCats[c.id];
+  return '<div class="card catcard"><button type="button" class="row catbtn" data-cat="'+c.id+'" style="width:100%;background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-align:left"><div><b>'+(open?'▾':'▸')+' '+esc(c.name)+'</b><div class="mut">Categoría · '+its.length+' artículos</div></div><div style="text-align:right"><span class="n">'+q+'</span><div class="mut">en almacén</div></div></button>'+(open?'<button type="button" class="btn small pri" data-add="'+c.id+'" style="margin-top:8px">+ Artículo en '+esc(c.name)+'</button>'+(its.length?its.map(itemCard).join(''):'<div class="empty">Vacía. Añade el primer artículo.</div>'):'')+'</div>';
+ }).join('');
+ const sueltos=S.items.filter(i=>!S.categories.some(c=>c.id===i.categoriaId));
+ if(sueltos.length) h+='<h3>Sin categoría</h3>'+sueltos.map(itemCard).join('');
+ return h;
+}
+document.addEventListener('click', function(e){
+ const b=e.target.closest&&e.target.closest('#btnCat');
+ if(!b) return;
+ e.preventDefault();
+ saveCat();
+});
+function bindAlmacen(){
+ const n=$('btnNewItem'); if(n) n.onclick=()=>editItem('','');
+ const j=$('btnManJson'); if(j) j.onclick=()=>exportJson('alm');
+ const w=$('btnManWa'); if(w) w.onclick=()=>wa('alm');
+ const p=$('btnManPdf'); if(p) p.onclick=exportPdf;
+ const x=$('btnManXls'); if(x) x.onclick=exportExcel;
+ document.querySelectorAll('.catbtn').forEach(el=>el.onclick=()=>{openCats[el.dataset.cat]=!openCats[el.dataset.cat]; render();});
+ document.querySelectorAll('[data-add]').forEach(el=>el.onclick=()=>editItem('',el.dataset.add));
+}
+function itemCard(i){
+ const img=i.foto?'<img class="thumb" src="'+i.foto+'" alt="">':'';
+ return '<div class="card itemcard"><div class="row">'+img+'<div style="flex:1"><b>'+esc(i.nombre)+'</b><div class="mut">Artículo'+(i.material?' · '+esc(i.material):'')+(i.medidas?' · '+esc(i.medidas):'')+'</div><div class="mut">'+(i.upc?i.upc+' uds/caja · ':'')+(i.codigo?'cód. '+esc(i.codigo):'sin código')+'</div></div><div style="text-align:right"><span class="n">'+ (+i.almacen||0) +'</span><div class="mut">almacén</div></div></div><div class="g2" style="margin-top:8px"><button class="btn small pri" onclick="mover(\''+i.id+'\',\'almacen\',\'restaurante\')">Al restaurante</button><button class="btn small gold" onclick="editItem(\''+i.id+'\')">Editar</button></div></div>';
+}
+function viewRest(){
+ let h=shareBtns('rest');
+ h+='<button class="btn gold big" style="margin-top:8px" onclick="cierre()">Cerrar temporada / devolver</button>';
+ const list=S.items.filter(i=>(+i.restaurante||0)>0);
+ if(!list.length) return h+'<div class="card empty">Nada en uso. Desde MiAlmacén pasa cajas o unidades al restaurante.</div>';
+ h+=list.map(i=>'<div class="card"><div class="row"><div><b>'+esc(i.nombre)+'</b><div class="mut">'+esc(catName(i.categoriaId))+' · '+Math.ceil((+i.restaurante)/(i.upc||1))+' cajas aprox.</div></div><span class="n">'+(+i.restaurante)+'</span></div><div class="g2" style="margin-top:8px"><button class="btn small" onclick="mover(\''+i.id+'\',\'restaurante\',\'almacen\')">Devolver al almacén</button><button class="btn small" style="border-color:var(--low);color:var(--low)" onclick="romper(\''+i.id+'\')">Rotura</button></div></div>').join('');
+ return h;
+}
+function viewRot(){
+ let h=shareBtns('rot');
+ h+='<button class="btn pri big" style="margin-top:8px" onclick="romper(\'\')">+ Anotar rotura</button>';
+ if(!S.roturas.length) return h+'<div class="card empty">Sin roturas. Se anotan a mano o al cerrar temporada si no vuelve todo.</div>';
+ h+=S.roturas.slice(0,150).map(r=>'<div class="card row"><div><b>'+esc(r.nombre)+'</b><div class="mut">'+new Date(r.t).toLocaleString('es-ES')+' · '+esc(r.nota||'')+(r.auto?' · cierre':'')+'</div></div><b style="color:var(--low)">−'+r.qty+'</b></div>').join('');
+ return h;
+}
+function viewTra(){
+ let h=shareBtns('tra');
+ h+='<button class="btn pri big" style="margin-top:8px" onclick="traspaso()">+ Traspaso entre hoteles</button>';
+ if(!S.traspasos.length) return h+'<div class="card empty">Sin traspasos. Lo que sale o entra se descuenta o suma solo.</div>';
+ h+=S.traspasos.slice(0,150).map(r=>'<div class="card row"><div><b>'+esc(r.nombre)+'</b><div class="mut">'+new Date(r.t).toLocaleString('es-ES')+' · '+(r.dir==='salida'?'Sale a ':'Entra de ')+esc(r.hotel)+' · '+esc(r.lugar)+'</div></div><b style="color:'+(r.dir==='salida'?'var(--low)':'var(--ok)')+'">'+(r.dir==='salida'?'−':'+')+r.qty+'</b></div>').join('');
+ return h;
+}
+function viewPed(){
+ const f=S.items.filter(i=>i.objetivo>0 && (+i.almacen||0)<i.objetivo).map(i=>({...i,falta:i.objetivo-(+i.almacen||0)}));
+ let h=shareBtns('ped');
+ if(!f.length) return h+'<div class="card empty">No hay pedido. Pon un objetivo al editar el artículo si quieres que avise cuando el almacén baje de esa cifra.</div>';
+ h+=f.map(i=>'<div class="card"><div class="row"><b>'+esc(i.nombre)+'</b><span class="n">'+i.falta+'</span></div><div class="mut">almacén '+i.almacen+' / obj '+i.objetivo+' · '+Math.ceil(i.falta/(i.upc||1))+' cajas</div></div>').join('');
+ return h;
+}
+function viewScan(){
+ return `<div class="card"><h3 style="margin:0 0 6px">Código de barras</h3>
+ <p class="mut">Haz la foto. Se guarda al momento y escribes los números de debajo. No hace falta que la cámara los lea sola.</p>
+ <button type="button" class="btn pri big" id="btnPick">Hacer foto del código</button>
+ <input id="filecam" type="file" accept="image/*" capture="environment" style="display:none">
+ <img id="prevcode" alt="" style="display:none;width:100%;max-height:180px;object-fit:contain;margin-top:8px;background:#111;border-radius:12px">
+ <p id="msg" class="mut" style="text-align:center">Sin foto todavía</p>
+ <label>Si prefieres, escribe el número sin foto</label>
+ <div style="display:flex;gap:8px"><input id="mc" inputmode="numeric" placeholder="8412345678901"><button type="button" class="btn pri" id="btnManual">Unir</button></div>
+ </div>`;
+}
+function viewHelp(){
+ return `<div class="card"><h3 style="margin-top:0">Cómo funciona</h3>
+ <p class="mut"><b>MiAlmacén</b> es la primera pantalla. Creas categorías y, dentro, artículos. No hay productos de ejemplo.</p>
+ <p class="mut">Al crear un artículo todo es opcional salvo el nombre: código (o foto del código), uds por caja, medidas, material, foto del producto, foto de la caja, objetivo de pedido y características extra.</p>
+ <p class="mut"><b>Restaurante</b> es lo que está en uso. “Al restaurante” resta del almacén y suma aquí (por unidades o cajas). “Devolver” hace lo contrario.</p>
+ <p class="mut"><b>Cerrar temporada:</b> indicas cuántas vuelven. Lo que vuelve entra al almacén. Lo que falta se anota solo en Roturas.</p>
+ <p class="mut"><b>Traspasos</b> entre hoteles suman o restan del almacén o del restaurante, según elijas.</p>
+ <p class="mut">Cada pestaña guarda su JSON y lo manda por WhatsApp. El escáner guarda el código y el artículo queda en MiAlmacén.</p>
+ <p class="mut">Instalar: Android, menú → Instalar. iPhone, Safari → Compartir → Añadir a pantalla de inicio. Hace falta HTTPS.</p></div>`;
+}
+function sheet(html){$('sh').innerHTML=html; $('ov').classList.add('on');}
+function closeSheet(){$('ov').classList.remove('on');}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov') closeSheet();});
+function saveCat(){
+ const el=$('cn'); const n=(el&&el.value||'').trim();
+ if(!n){toast('Escribe el nombre'); return;}
+ if(S.categories.some(c=>c.name.toLowerCase()===n.toLowerCase())){toast('Esa categoría ya existe'); return;}
+ const id=uid();
+ S.categories.push({id,name:n});
+ openCats[id]=true;
+ save(); render(); toast('Categoría creada');
+}
+function editItem(id,catId){
+ const i=id?by(id):null;
+ const opts=S.categories.map(c=>'<option value="'+c.id+'" '+((i?i.categoriaId:catId)===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('');
+ const extras=(i&&i.extras||[]).map((e,n)=>'<div class="g2"><input data-ek value="'+esc(e.k)+'"><input data-ev value="'+esc(e.v)+'"></div>').join('');
+ sheet(`<h3>${i?'Editar':'Nuevo'} artículo</h3>
+ <label>Nombre</label><input id="nm" value="${esc(i?i.nombre:'')}">
+ <label>Cantidad en almacén</label><input id="st" type="number" min="0" inputmode="numeric" value="${i? (+i.almacen||0) : ''}" placeholder="Ej. 120">
+ <p class="mut">Esa cifra queda en el almacén, en la categoría y en el manifiesto.</p>
+ <label>Categoría</label><select id="cat"><option value="">Sin categoría</option>${opts}</select>
+ <label>Código de barras</label><input id="cd" value="${esc(i?i.codigo:'')}">
+ <label>Foto del código</label><input id="bcf" type="file" accept="image/*">
+ ${i&&i.fotoCodigo?'<img src="'+i.fotoCodigo+'" style="width:100%;max-height:120px;object-fit:contain;margin-top:6px">':''}
+ <div class="g2"><div><label>Uds por caja</label><input id="up" type="number" min="1" placeholder="12" value="${i&&i.upc?i.upc:''}"></div>
+ <div><label>Objetivo almacén</label><input id="ob" type="number" min="0" placeholder="opcional" value="${i&&i.objetivo?i.objetivo:''}"></div></div>
+ <label>Medidas</label><input id="md" placeholder="27 cm, 30 cl…" value="${esc(i?i.medidas:'')}">
+ <label>Material</label><input id="mt" placeholder="cristal, porcelana…" value="${esc(i?i.material:'')}">
+ <label>Foto del producto</label><input id="pf" type="file" accept="image/*">
+ <label>Foto de la caja</label><input id="bf" type="file" accept="image/*">
+ <div id="extras">${extras}</div>
+ <button type="button" class="btn big" style="margin-top:8px" id="btnExtra">+ Añadir característica</button>
+ <button type="button" class="btn pri big" style="margin-top:8px" id="btnSaveItem">Guardar en MiAlmacén</button>
+ ${i?'<button type="button" class="btn big" style="margin-top:8px;border-color:var(--low);color:var(--low)" id="btnDelItem">Eliminar</button>':''}`);
+ setTimeout(()=>{
+  const ex=$('btnExtra'); if(ex) ex.onclick=addExtra;
+  const sv=$('btnSaveItem'); if(sv) sv.onclick=()=>saveItem(id||'');
+  const dl=$('btnDelItem'); if(dl) dl.onclick=()=>delItem(id);
+ },0);
+}
+function addExtra(){const d=document.createElement('div'); d.className='g2'; d.innerHTML='<input data-ek placeholder="Característica"><input data-ev placeholder="Valor">'; $('extras').appendChild(d);}
+function fileToData(input,max){return new Promise(res=>{const f=input.files&&input.files[0]; if(!f) return res(''); const img=new Image(); const url=URL.createObjectURL(f); img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',.72));}; img.src=url;});}
+async function saveItem(id){
+ const nombre=$('nm').value.trim(); if(!nombre){toast('Pon un nombre'); return;}
+ let i=id?by(id):null; const nuevo=!i;
+ if(!i){i={id:uid(),almacen:0,restaurante:0}; S.items.push(i);}
+ const antes=+i.almacen||0;
+ const ahora=Math.max(0,Math.floor(+$('st').value)||0);
+ i.almacen=ahora;
+ i.nombre=nombre; i.categoriaId=$('cat').value; i.codigo=$('cd').value.trim();
+ i.upc=Math.max(0,Math.floor(+$('up').value)||0); i.objetivo=Math.max(0,Math.floor(+$('ob').value)||0);
+ i.medidas=$('md').value.trim(); i.material=$('mt').value.trim();
+ const bc=await fileToData($('bcf'),900); if(bc) i.fotoCodigo=bc;
+ if(!i.fotoCodigo && window._pendingBc){ i.fotoCodigo=window._pendingBc; window._pendingBc=''; }
+ const pf=await fileToData($('pf'),800); if(pf) i.foto=pf;
+ const bf=await fileToData($('bf'),800); if(bf) i.fotoCaja=bf;
+ i.extras=[...document.querySelectorAll('[data-ek]')].map((el,n)=>({k:el.value.trim(),v:document.querySelectorAll('[data-ev]')[n].value.trim()})).filter(e=>e.k||e.v);
+ if(ahora!==antes) S.log.unshift({t:Date.now(),n:i.nombre,d:ahora-antes,m:nuevo?'Alta almacén':'Ajuste almacén'});
+ save(); closeSheet(); tab='alm'; render(); toast('Guardado en MiAlmacén');
+}
+function delItem(id){S.items=S.items.filter(i=>i.id!==id); save(); closeSheet(); render();}
+function mover(id,from,to){
+ const i=by(id); if(!i) return;
+ sheet(`<h3>${esc(i.nombre)}</h3><p class="mut">Almacén ${i.almacen||0} · Restaurante ${i.restaurante||0}${i.upc?' · '+i.upc+' uds/caja':''}</p>
+ <label>Cantidad</label><input id="q" type="number" min="1" value="1">
+ <label>En</label><select id="u"><option value="u">Unidades</option><option value="c">Cajas</option></select>
+ <button class="btn pri big" style="margin-top:12px" onclick="doMove('${id}','${from}','${to}')">${to==='restaurante'?'Pasar al restaurante':'Devolver al almacén'}</button>`);
+}
+function doMove(id,from,to){
+ const i=by(id); let q=Math.floor(+$('q').value)||0; if(!q) return;
+ if($('u').value==='c') q*=(i.upc||1);
+ if((+i[from]||0)<q){toast('No hay tantas en '+from); return;}
+ i[from]=(+i[from]||0)-q; i[to]=(+i[to]||0)+q;
+ S.log.unshift({t:Date.now(),n:i.nombre,d:q,m:from+' → '+to});
+ save(); closeSheet(); render(); toast('Movido');
+}
+function romper(id){
+ const opts=S.items.map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+esc(i.nombre)+'</option>').join('');
+ sheet(`<h3>Rotura</h3><label>Artículo</label><select id="ri">${opts}</select>
+ <label>Sale de</label><select id="rl"><option value="restaurante">Restaurante</option><option value="almacen">Almacén</option></select>
+ <label>Unidades rotas</label><input id="rq" type="number" min="1" value="1">
+ <label>Nota</label><input id="rn" placeholder="opcional">
+ <button class="btn pri big" style="margin-top:12px" onclick="doRomper()">Anotar</button>`);
+}
+function doRomper(){
+ const i=by($('ri').value); if(!i) return; const q=Math.floor(+$('rq').value)||0; if(!q) return;
+ const lugar=$('rl').value;
+ if((+i[lugar]||0)<q){toast('No hay tantas'); return;}
+ i[lugar]-=q;
+ S.roturas.unshift({id:uid(),t:Date.now(),itemId:i.id,nombre:i.nombre,qty:q,nota:$('rn').value.trim(),auto:false,lugar});
+ save(); closeSheet(); tab='rot'; render();
+}
+function cierre(){
+ const list=S.items.filter(i=>(+i.restaurante||0)>0);
+ if(!list.length){toast('No hay material en restaurante'); return;}
+ sheet('<h3>Cierre de temporada</h3><p class="mut">Lo que vuelves entra al almacén. Lo que no vuelve se anota como rotura.</p>'+
+  list.map(i=>'<label>'+esc(i.nombre)+' (en uso '+i.restaurante+')</label><input data-back="'+i.id+'" type="number" min="0" max="'+i.restaurante+'" value="'+i.restaurante+'">').join('')+
+  '<button class="btn gold big" style="margin-top:12px" onclick="doCierre()">Confirmar cierre</button>');
+}
+function doCierre(){
+ document.querySelectorAll('[data-back]').forEach(el=>{
+  const i=by(el.dataset.back); if(!i) return;
+  let back=Math.max(0,Math.floor(+el.value)||0);
+  const had=+i.restaurante||0;
+  if(back>had) back=had;
+  const rot=had-back;
+  i.almacen=(+i.almacen||0)+back;
+  i.restaurante=0;
+  if(rot) S.roturas.unshift({id:uid(),t:Date.now(),itemId:i.id,nombre:i.nombre,qty:rot,nota:'No devuelto al cierre',auto:true,lugar:'restaurante'});
+ });
+ save(); closeSheet(); tab='rot'; render(); toast('Temporada cerrada');
+}
+function traspaso(){
+ const opts=S.items.map(i=>'<option value="'+i.id+'">'+esc(i.nombre)+'</option>').join('');
+ sheet(`<h3>Traspaso</h3><label>Artículo</label><select id="ti">${opts}</select>
+ <label>Hotel</label><input id="th" placeholder="Nombre del otro hotel">
+ <label>Dirección</label><select id="td"><option value="salida">Sale de este hotel</option><option value="entrada">Entra a este hotel</option></select>
+ <label>Lugar</label><select id="tl"><option value="almacen">Almacén</option><option value="restaurante">Restaurante</option></select>
+ <label>Unidades</label><input id="tq" type="number" min="1" value="1">
+ <label>Nota</label><input id="tn">
+ <button class="btn pri big" style="margin-top:12px" onclick="doTra()">Registrar</button>`);
+}
+function doTra(){
+ const i=by($('ti').value); if(!i){toast('Crea antes el artículo'); return;}
+ const q=Math.floor(+$('tq').value)||0; if(!q) return;
+ const dir=$('td').value, lugar=$('tl').value, hotel=$('th').value.trim()||'otro hotel';
+ if(dir==='salida'){ if((+i[lugar]||0)<q){toast('No hay tantas'); return;} i[lugar]-=q; }
+ else i[lugar]=(+i[lugar]||0)+q;
+ S.traspasos.unshift({id:uid(),t:Date.now(),itemId:i.id,nombre:i.nombre,qty:q,dir,lugar,hotel,nota:$('tn').value.trim()});
+ save(); closeSheet(); render();
+}
+function payload(kind){
+ if(kind==='alm') return {categorias:S.categories,articulos:S.items.map(({foto,fotoCaja,fotoCodigo,...r})=>r)};
+ if(kind==='rest') return S.items.filter(i=>i.restaurante>0).map(i=>({nombre:i.nombre,categoria:catName(i.categoriaId),restaurante:i.restaurante}));
+ if(kind==='rot') return S.roturas;
+ if(kind==='tra') return S.traspasos;
+ if(kind==='ped') return S.items.filter(i=>i.objetivo>(+i.almacen||0)).map(i=>({nombre:i.nombre,falta:i.objetivo-i.almacen,cajas:Math.ceil((i.objetivo-i.almacen)/(i.upc||1))}));
+ return S;
+}
+function textOf(kind){
+ const d=new Date().toLocaleString('es-ES');
+ if(kind==='alm') return 'MI ALMACÉN '+d+'\n'+S.categories.map(c=>{const its=S.items.filter(i=>i.categoriaId===c.id); return '\n'+c.name+'\n'+ (its.map(i=>'- '+i.nombre+': '+(+i.almacen||0)+' uds').join('\n')||'- vacío');}).join('\n');
+ if(kind==='rest') return 'RESTAURANTE '+d+'\n'+S.items.filter(i=>i.restaurante).map(i=>'- '+i.nombre+': '+i.restaurante).join('\n');
+ if(kind==='rot') return 'ROTURAS '+d+'\n'+S.roturas.map(r=>'- '+r.nombre+' '+r.qty+' ('+(r.auto?'cierre':'manual')+')').join('\n');
+ if(kind==='tra') return 'TRASPASOS '+d+'\n'+S.traspasos.map(r=>'- '+(r.dir==='salida'?'SALE':'ENTRA')+' '+r.qty+' '+r.nombre+' '+r.hotel+' ('+r.lugar+')').join('\n');
+ if(kind==='ped') return 'PEDIDO '+d+'\n'+S.items.filter(i=>i.objetivo>(+i.almacen||0)).map(i=>'- '+i.nombre+': '+(i.objetivo-i.almacen)+' uds').join('\n');
+ return '';
+}
+function exportJson(kind){const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(payload(kind),null,2)],{type:'application/json'})); a.download='stockgo-copia-'+kind+'.json'; a.click(); toast('Copia de seguridad guardada');}
+function wa(kind){const t=textOf(kind)||'Sin datos'; window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}
+function almRows(){
+ const rows=[];
+ S.categories.forEach(c=>{
+  const its=S.items.filter(i=>i.categoriaId===c.id);
+  its.forEach(i=>rows.push([c.name,i.nombre,+i.almacen||0,i.upc||'',i.codigo||'',i.medidas||'',i.material||'']));
+  if(!its.length) rows.push([c.name,'(vacía)','','','','','']);
+ });
+ S.items.filter(i=>!S.categories.some(c=>c.id===i.categoriaId)).forEach(i=>rows.push(['Sin categoría',i.nombre,+i.almacen||0,i.upc||'',i.codigo||'',i.medidas||'',i.material||'']));
+ return rows;
+}
+function exportExcel(){
+ const head=['Categoría','Artículo','Cantidad almacén','Uds por caja','Código','Medidas','Material'];
+ const lines=[head].concat(almRows()).map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\n');
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'}));
+ a.download='manifiesto-almacen.csv';
+ a.click();
+ toast('Excel guardado');
+}
+function pdfEsc(s){
+ return String(s||'').replace(/[\\()]/g,' ').replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ñ/g,'n').replace(/Á/g,'A').replace(/É/g,'E').replace(/Í/g,'I').replace(/Ó/g,'O').replace(/Ú/g,'U').replace(/Ñ/g,'N').replace(/[^\x20-\x7E]/g,' ');
+}
+function exportPdf(){
+ const lines=['StockGo  ·  Manifiesto del almacen', new Date().toLocaleString('es-ES'), ''];
+ S.categories.forEach(c=>{
+  const its=S.items.filter(i=>i.categoriaId===c.id);
+  const q=its.reduce((a,i)=>a+(+i.almacen||0),0);
+  lines.push('CATEGORIA  '+c.name+'   ·   '+q+' uds');
+  if(!its.length) lines.push('   (vacia)');
+  its.forEach(i=>lines.push('   '+i.nombre+'    '+(+i.almacen||0)+' uds'+(i.upc?'   · '+i.upc+'/caja':'')+(i.medidas?'   · '+i.medidas:'')+(i.material?'   · '+i.material:'')));
+  lines.push('');
+ });
+ if(lines.length<4) lines.push('Almacen vacio');
+ const chunks=[];
+ for(let i=0;i<lines.length;i+=46) chunks.push(lines.slice(i,i+46));
+ let body='%PDF-1.3\n';
+ const offsets=[0];
+ function push(obj){offsets.push(body.length); body+= (offsets.length-1)+' 0 obj\n'+obj+'\nendobj\n';}
+ const kids=chunks.map((_,i)=>5+i*2);
+ push('<< /Type /Catalog /Pages 2 0 R >>');
+ push('<< /Type /Pages /Count '+chunks.length+' /Kids ['+kids.map(id=>id+' 0 R').join(' ')+'] >>');
+ push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+ chunks.forEach((chunk,i)=>{
+  const stream=chunk.map((ln,n)=>'BT /F1 11 Tf 40 '+(800-n*16)+' Td ('+pdfEsc(ln)+') Tj ET').join('\n');
+  const contentId=4+i*2;
+  push('<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream');
+  push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents '+contentId+' 0 R /Resources << /Font << /F1 3 0 R >> >> >>');
+ });
+ let xref='xref\n0 '+offsets.length+'\n0000000000 65535 f \n';
+ for(let i=1;i<offsets.length;i++) xref+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+ const start=body.length;
+ body+=xref+'trailer << /Size '+offsets.length+' /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF';
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([body],{type:'application/pdf'}));
+ a.download='manifiesto-almacen.pdf';
+ a.click();
+ toast('PDF guardado');
+}
+function bindScan(){
+ const f=$('filecam'); if(f) f.onchange=()=>previewCode(f);
+ const p=$('btnPick'); if(p) p.onclick=()=>f&&f.click();
+ const m=$('btnManual'); if(m) m.onclick=()=>onCode(($('mc').value||'').trim(), pendingPhoto||'');
+}
+let pendingPhoto='';
+function previewCode(input){
+ const file=input.files&&input.files[0]; if(!file) return;
+ const img=new Image(); const url=URL.createObjectURL(file);
+ img.onload=()=>{
+  const sc=Math.min(1,1200/Math.max(img.width,img.height));
+  const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  URL.revokeObjectURL(url); pendingPhoto=c.toDataURL('image/jpeg',.85);
+  const p=$('prevcode'); if(p){p.src=pendingPhoto; p.style.display='block';}
+  const msg=$('msg'); if(msg) msg.textContent='Foto guardada. Confirma el número.';
+  confirmCode('', pendingPhoto);
+  decodeData(pendingPhoto);
+ };
+ img.src=url;
+}
+async function readPending(){ if(!pendingPhoto){toast('Primero haz la foto'); return;} await decodeData(pendingPhoto); }
+function loadScript(src,key){ if(window[key]) return Promise.resolve(); return new Promise((ok,ko)=>{const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=ko; document.head.appendChild(e);});}
+function loadZ(){return loadScript('https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js','ZXing');}
+function loadTess(){return loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js','Tesseract');}
+async function decodeData(data){
+ let code='';
+ try{
+  await loadZ();
+  const img=new Image();
+  code=await new Promise((ok)=>{img.onload=async()=>{try{ok((await new ZXing.BrowserMultiFormatReader().decodeFromImageElement(img)).getText());}catch(e){ok('');}}; img.onerror=()=>ok(''); img.src=data;});
+ }catch(e){}
+ const el=$('cdhand'); if(el && code && !el.value) el.value=code;
+}
+function confirmCode(code,img){
+ sheet(`<h3>Número del código</h3>
+ ${img?'<img src="'+img+'" style="width:100%;max-height:140px;object-fit:contain;background:#111;border-radius:10px">':''}
+ <p class="mut">${code?'Número leído. Corrígelo si falta algún dígito.':'No se leyó solo. Escribe los números que se ven bajo las barras.'}</p>
+ <input id="cdhand" inputmode="numeric" value="${esc(code)}">
+ <button class="btn pri big" style="margin-top:10px" id="btnUseCode">Unir este número al producto</button>`);
+ setTimeout(()=>{const b=$('btnUseCode'); if(b) b.onclick=()=>onCode($('cdhand').value.trim(),img);},0);
+}
+async function openCamera(video){
+ const tries=[{video:{facingMode:{ideal:'environment'}},audio:false},{video:true,audio:false}];
+ let last; for(const c of tries){try{stream=await navigator.mediaDevices.getUserMedia(c); video.srcObject=stream; video.muted=true; await video.play(); return;}catch(e){last=e;}} throw last;
+}
+async function startScan(){
+ const box=$('livebox'), cap=$('btnCap'); if(box) box.style.display='block'; if(cap) cap.style.display='block';
+ const msg=$('msg'), video=$('v'); if(!video){toast('Abre Escanear otra vez'); return;}
+ scanActive=true; msg.textContent='Permiso de cámara…';
+ try{ await openCamera(video); msg.textContent='Encuadra barras y números, luego captura'; }
+ catch(e){ scanActive=false; msg.textContent='Cámara no disponible. Usa la foto.'; }
+}
+function captureCode(){
+ const v=$('v'); if(!v||!v.videoWidth){toast('Espera a que se vea la cámara'); return;}
+ pendingPhoto=snap(v); const p=$('prevcode'); if(p){p.src=pendingPhoto; p.style.display='block';}
+ decodeData(pendingPhoto);
+}
+async function decodeFile(input){ previewCode(input); setTimeout(()=>readPending(),400); }
+function snap(video){try{const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480; c.getContext('2d').drawImage(video,0,0); return c.toDataURL('image/jpeg',.7);}catch(e){return '';}}
+function stopScan(){scanActive=false; if(raf) cancelAnimationFrame(raf); if(reader){try{reader.reset()}catch(e){} reader=null;} if(stream){stream.getTracks().forEach(t=>t.stop()); stream=null;}}
+async function decodeFile(input){
+ const f=input.files&&input.files[0]; if(!f) return;
+ const data=await fileToData(input,1000);
+ try{await loadZ(); const img=new Image(); img.onload=async()=>{try{const res=await new ZXing.BrowserMultiFormatReader().decodeFromImageElement(img); onCode(res.getText(),data);}catch(e){pendingCode=''; sheet('<h3>No se leyó el código</h3><p class="mut">Puedes escribirlo y guardar la foto.</p><input id="cdhand"><button class="btn pri big" onclick="onCode($(\'cdhand\').value.trim(),pendingPhoto)">Usar</button>'); window.pendingPhoto=data;}}; img.src=data;}catch(e){toast('Lector no cargado');}
+}
+function captureCode(){
+ const v=$('v'); if(!v||!v.videoWidth){toast('Inicia la cámara primero'); return;}
+ const img=snap(v);
+ loadZ().then(async()=>{
+  try{
+   const im=new Image();
+   im.onload=async()=>{
+    try{const res=await new ZXing.BrowserMultiFormatReader().decodeFromImageElement(im); onCode(res.getText(),img);}
+    catch(e){toast('No se ve el código. Acércalo.');}
+   };
+   im.src=img;
+  }catch(e){toast('Sin lector');}
+ }).catch(()=>toast('Sin lector'));
+}
+function onCode(code,img){
+ if(!code) return; stopScan();
+ const i=S.items.find(x=>x.codigo&&x.codigo===code);
+ if(i){ if(img && !i.fotoCodigo){i.fotoCodigo=img; save();} toast('Ya está en MiAlmacén'); editItem(i.id); return;}
+ window._pendingBc=img||'';
+ editItem('','');
+ setTimeout(()=>{ const el=$('cd'); if(el) el.value=code; },40);
+ toast('Código nuevo: complétalo y se guarda en MiAlmacén');
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e;});
+render();
+if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
